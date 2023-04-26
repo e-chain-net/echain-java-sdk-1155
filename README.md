@@ -16,3 +16,10 @@
 | TestQuery  | 查询区块号、交易收据、NFT余额的请求示例 |
 | TestSendTx  | 发送交易的请求示例 |
 | TestContractDeploy  | 部署标准``ERC1155``合约的请求示例 |
+
+**注意：** 发送请求前需要先设置服务端证书路径（证书需要向亿链开发人员要一下），示例如下：
+```
+    static{
+        HttpRequest.setServerCrtPath("D:\\yeepay\\e-chain.net.cn_server.crt");
+    }
+```
