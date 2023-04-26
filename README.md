@@ -1,5 +1,5 @@
 # EChain-Java-SDK-1155
-适配``ERC1155``合约的 ``EChain-Server`` Java 签名SDK，提供``ERC1155``合约中如下方法的签名方法：
+适配标准``ERC1155``合约的 ``EChain-Server`` 签名SDK，提供标准``ERC1155``合约中如下方法的签名方法：
 ```
 function mint(address account, uint256 id, uint256 amount, bytes memory data);
 function safeTransferFrom(address from,address to,uint256 id,uint256 amount,bytes memory data); 
