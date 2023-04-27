@@ -67,7 +67,7 @@ public class EChainSDK {
         return createSignedTx(privateHex,contractAddress,input,blockNumber);
     }
     /**
-     * 签名铸造交易
+     * 签名销毁交易
      * @param from      源地址
      * @param tokenID   NFT-ID
      * @param amount    销毁数量

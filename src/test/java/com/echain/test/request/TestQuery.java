@@ -38,17 +38,28 @@ public class TestQuery {
         String payload = Util.formatQueryPayload("getBlockNumber",new ArrayList<>());
         String response = HttpRequest.sendPost(Define.UrlQuery,payload);
         System.out.println("请求区块号：");
-//        System.out.println(payload);
-        System.out.println(response);
+        try{
+            int blockNumber = getBlockNumber();
+            System.out.println("BlockNumber=" + blockNumber);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private static int getBlockNumber() throws Exception {
+        String payload = Util.formatQueryPayload("getBlockNumber",new ArrayList<>());
+        String response = HttpRequest.sendPost(Define.UrlQuery,payload);
+//        System.out.println(response);
         JSONObject obj = new JSONObject(response);
         if(!obj.getString("code").equals("EC000000")){
-            System.out.println("请求区块号失败："+obj.getString("message"));
+            throw new Exception("请求区块号失败："+obj.getString("message"));
         }else{
-            System.out.println("BlockNumber=" + obj.getJSONObject("data").getInt("blockNumber"));
+            return obj.getJSONObject("data").getInt("blockNumber");
         }
     }
 
     public static void TestGetTransactionReceipt(){
+        System.out.println("");
         String txHash = "0x3ac02bbaca5e7e0adc05d0e36954c86ee39108d543542a49eed7420d445d2536";
 
         String payload = Util.formatQueryPayload("getTransactionReceipt",new ArrayList<>(Arrays.asList(txHash,false)));
@@ -61,11 +72,25 @@ public class TestQuery {
         if(!obj.getString("code").equals("EC000000")){
             System.out.println("请求交易收据失败："+obj.getString("message"));
         }else{
-            boolean ok = obj.getJSONObject("data").getBoolean("statusOK");
+            boolean ok = obj.getJSONObject("data").getJSONObject("result").getBoolean("statusOK");
             System.out.println("交易结果=" + (ok?"成功":"失败"));
         }
     }
 
+
+    public static void TestBalanceOf(){
+        System.out.println("");
+        String account = "0x95a1a99be965777d8b0e42fe5ec1c161f6c3a5da";
+        BigInteger tokenId = BigInteger.valueOf(1004);
+
+        System.out.println("请求NFT余额：");
+        try{
+            int balance = getBalanceOf(account,tokenId,Define.ContractAddress);
+            System.out.println("NFT余额="+balance);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     private static String encodeBalanceOf(String address,BigInteger tokenId){
         Function function = new Function("balanceOf",
@@ -74,28 +99,24 @@ public class TestQuery {
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return FunctionEncoder.encode(function);
     }
-    public static void TestBalanceOf(){
-        String account = "0x95a1a99be965777d8b0e42fe5ec1c161f6c3a5da";
-        BigInteger tokenId = BigInteger.valueOf(1004);
 
+    private static int getBalanceOf(String account,BigInteger tokenId,String contractAddress) throws Exception {
         String input = encodeBalanceOf(account,tokenId);
-
-        String payload = Util.formatQueryPayload("call",new ArrayList<>(Arrays.asList(Define.ContractAddress,input)));
+        String payload = Util.formatQueryPayload("call",new ArrayList<>(Arrays.asList(contractAddress,input)));
 //        System.out.println(payload.toString());
         String response = HttpRequest.sendPost(Define.UrlQuery,payload);
-        System.out.println("请求NFT余额：");
-        System.out.println(response);
+//        System.out.println(response);
         JSONObject obj = new JSONObject(response);
         if(!obj.getString("code").equals("EC000000")){
-            System.out.println("请求balanaceOf："+obj.getString("message"));
+            throw new Exception("请求balanaceOf："+obj.getString("message"));
         }else{
-            int status = obj.getJSONObject("data").getJSONObject("jsonRpcResp").getJSONObject("result").getInt("status");
+            int status = obj.getJSONObject("data").getJSONObject("result").getInt("status");
             if(status != 0){
-                System.out.println("请求balanaceOf 失败，status="+status);
+                throw new Exception("请求balanaceOf 失败，status="+status);
             }else{
-                String output = obj.getJSONObject("data").getJSONObject("jsonRpcResp").getJSONObject("result").getString("output");
+                String output = obj.getJSONObject("data").getJSONObject("result").getString("output");
                 BigInteger balance = new BigInteger(output.substring(2),16);
-                System.out.println("NFT余额=" + balance.intValue());
+                return balance.intValue();
             }
         }
     }
