@@ -9,6 +9,10 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -22,10 +26,41 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 public class HttpRequest {
-    private static String EChainServerCrtPath = "";
+    public static void setServerCrtPath(String crtPath){
+        try {
+            // Initialize the KeyStore
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
 
-    public static void setServerCrtPath(String path){
-        EChainServerCrtPath = path;
+            // Load the certificate file
+            InputStream inputStream = new FileInputStream(crtPath);
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(inputStream);
+
+            // Add certificate to KeyStore
+            trustStore.setCertificateEntry("echain-server-test", certificate);
+
+            // Initialize TrustManagerFactory with the read trustStore
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+
+            // Initialize SSLContext using the trustManagerFactory
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+
+            // Set SSLContext on HttpsURLConnection
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String getUrlData(Map<String, Object> data){
@@ -167,29 +202,6 @@ public class HttpRequest {
             long timeStamp = System.currentTimeMillis();
             String content = Define.MerchantNo + "-" + timeStamp;
             String signstr = RSAUtils.sign(content,Define.RsaPrivate);
-
-            // Initialize the KeyStore
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
-
-            // Load the certificate file
-            InputStream inputStream = new FileInputStream(EChainServerCrtPath);
-            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-            X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(inputStream);
-
-            // Add certificate to KeyStore
-            trustStore.setCertificateEntry("echain-server-test", certificate);
-
-            // Initialize TrustManagerFactory with the read trustStore
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
-
-            // Initialize SSLContext using the trustManagerFactory
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-
-            // Set SSLContext on HttpsURLConnection
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
 
             URL realUrl = new URL(url);
             // 打开和URL之间的连接
