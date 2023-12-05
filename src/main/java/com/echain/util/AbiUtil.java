@@ -15,10 +15,9 @@ public class AbiUtil {
         Address to = new Address(toAddress);
         Uint256 tokenId256 = new Uint256(tokenId);
         Uint256 amount256 = new Uint256(amount);
-        DynamicBytes data = new DynamicBytes(new byte[]{});
         Function function = new Function(
                 "mint",                      // Function name
-                Arrays.asList(to,tokenId256,amount256,data),         // Input parameters
+                Arrays.asList(to,tokenId256,amount256),         // Input parameters
                 Collections.emptyList());  // Output parameter(s)
 
         return FunctionEncoder.encode(function);
@@ -29,10 +28,9 @@ public class AbiUtil {
         Address toA = new Address(to);
         Uint256 tokenId256 = new Uint256(tokenId);
         Uint256 amount256 = new Uint256(amount);
-        DynamicBytes data = new DynamicBytes(new byte[]{});
         Function function = new Function(
                 "safeTransferFrom",                      // Function name
-                Arrays.asList(fromA,toA,tokenId256,amount256,data),         // Input parameters
+                Arrays.asList(fromA,toA,tokenId256,amount256),         // Input parameters
                 Collections.emptyList());  // Output parameter(s)
 
         return FunctionEncoder.encode(function);
