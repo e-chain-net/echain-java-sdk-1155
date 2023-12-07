@@ -1,7 +1,7 @@
 package com.echain.util;
 
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import java.security.KeyFactory;
 import java.security.PrivateKey;
@@ -20,15 +20,16 @@ public class RSAUtils {
     */
    public static String sign(String content, String privateKey) {
       String charset = "utf-8";
+
       try {
-         PKCS8EncodedKeySpec priPKCS8 = new PKCS8EncodedKeySpec(Base64.decode(privateKey));
+         PKCS8EncodedKeySpec priPKCS8 = new PKCS8EncodedKeySpec(Base64.decodeBase64(privateKey));
          KeyFactory keyf = KeyFactory.getInstance("RSA");
          PrivateKey priKey = keyf.generatePrivate(priPKCS8);
          java.security.Signature signature = java.security.Signature.getInstance(SIGN_ALGORITHMS);
          signature.initSign(priKey);
          signature.update(content.getBytes(charset));
          byte[] signed = signature.sign();
-         return Base64.encode(signed);
+         return Base64.encodeBase64String(signed);
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -44,12 +45,12 @@ public class RSAUtils {
    public static boolean doCheck(String content, String sign, String publicKey) {
       try {
          KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-         byte[] encodedKey = Base64.decode(publicKey);
+         byte[] encodedKey = Base64.decodeBase64(publicKey);
          PublicKey pubKey = keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
          java.security.Signature signature = java.security.Signature.getInstance(SIGN_ALGORITHMS);
          signature.initVerify(pubKey);
          signature.update(content.getBytes("utf-8"));
-         boolean bverify = signature.verify(Base64.decode(sign));
+         boolean bverify = signature.verify(Base64.decodeBase64(sign));
          return bverify;
       } catch (Exception e) {
          e.printStackTrace();

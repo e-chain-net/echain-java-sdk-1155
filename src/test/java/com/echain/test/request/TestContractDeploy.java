@@ -7,7 +7,7 @@ import org.json.JSONObject;
 public class TestContractDeploy {
     public static Account owner = new Account("0xdb222aaaefb28a8a2b1533c6b098b819a80665b6","500a9faf63d80563207702295b9bf9f5dc98956fd253d81b8ba062f69b5cf6b1");
     static{
-        HttpRequest.setServerCrtPath("D:\\yeepay\\e-chain.net.cn_server.crt");
+        HttpRequest.setServerCrtPath("/Users/yp-10221/Documents/e-chain.net.cn_server.crt");
     }
 
     public static void main(String args[]){
